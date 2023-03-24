@@ -7,9 +7,18 @@ from collections import Counter
 import nltk
 nltk.download('stopwords')
 from nltk.corpus import stopwords
+import re
+
+
+# import matplotlib.pyplot as plt
+# from wordcloud import WordCloud
+
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+nltk.download('vader_lexicon')
+
 
 def choose_movie(x):
-    """ Chooses a movie"""
+    """ Chooses a movie and return the reviews """
     #create an instance of the Cinemagoer class
     ia = Cinemagoer()
     
@@ -22,7 +31,13 @@ def choose_movie(x):
     return (movie_reviews_content)
 
 
-movie_reviews_content=choose_movie('Scream 6')
+movie_reviews_content=choose_movie('cats')
+
+def number_score(movie_reviews_content):
+    """Returns the average rating from all the reviews"""
+    
+
+
 
 def extract_content(movie_reviews_content):
     """Put all the content of the reviews into one string"""
@@ -62,9 +77,13 @@ hist=process_content(reviews)
 
 def rid_stopwords(hist):
     """Get rids of stop words and returns a dictionary without them."""
-    stop_words=set(stopwords.words('english'))
+    stop_words=set(stopwords.words('english')) #learned in chatgpt
     text = hist
-    histogram = {word: freq for word, freq in text.items() if word.lower() not in stop_words}
+    histogram = {}
+    for word, freq in hist.items():
+        word=re.sub(r'\d+','',word) #learned from chatgpt
+        if word.lower() not in stop_words:
+            histogram[word]=freq
     return (histogram)
 
 histogram=rid_stopwords(hist)
@@ -79,64 +98,64 @@ def most_common(histogram):
         freq=histogram[word]
         top.append((freq,word))
     top.sort(reverse=True)
-    return top[:20]
+    top_20= top[:20]
+    return top_20
 
-top=most_common(histogram)
-print(top)
+top_20=most_common(histogram)
+# print(top_20)
 
+def most_commonlist(top_20):
+    """Print the list of top 20 words."""
+    common=[]
+    for tuples in top_20:
+        common.append(tuples[1])
+    return common
 
-# def main():
-    
+common=most_commonlist(top_20)
+# print(common)
 
+def sentiment(reviews):
+    """Returns a numerical score form 0-1 on 
+    how negative, neutral, positive and compound the reviews are. """
+    score = SentimentIntensityAnalyzer().polarity_scores(reviews) #learned from chatgpt
+    return score
 
+score=sentiment(reviews)
 
+def overall_sentiment(score):
+    """Prints how negative or
+      positive a film was perceived from the sentiment analysis score."""
+    if score['compound']==1:
+        print(" very postive")
+    if score['compound']<0:
+        print("very negative")
+    if 0< score['compound']<=0.5:
+        print("neutral")
+    if 0.5<score['compound']<1:
+        print("positive")
 
+# overall_thoughts=overall_sentiment(score)
 
-# movie_reviews_content=movie_reviews['data']['reviews'] #list of dictionaries of each review
-# print(movie_reviews_content[1])
-
-
-# def process_reviewsinto_list(movie_reviews):
-#     """Takes all the reviews of the movie and returns a list"""
-#     for review in movie_reviews["data"]["reviews"]:
-#         # review_title=review['title']
-#         # review_content=review['content']
-#         reviews_list.append(review["content"])
-#     return reviews_list
-
-
-# movie_review_list = process_reviewsinto_list(movie_reviews)
-# print(movie_review_list)
-
-
-# def word_freq(movie_review_list):
-#     """Takes a list of words
-#     and returns a dict of
-#     all the words and their frequencies."""
-
-#     strippables = "".join(
-#         [chr(i) for i in range(sys.maxunicode) if category(chr(i)).startswith("P")]
-#     )
-#     freq = {}
-#     for word in movie_review_list:
-
-
-# stop_words=['The','and','of']
+        
 
 
-# def filter_out_stopwords(movie_reviews):
-#     """Filter out stop words like the, end, of, etc for more accurate representation of what was said about
-#     the film."""
+def main():
+    reviews=extract_content(movie_reviews_content)
+    hist=process_content(reviews)
+    histogram=rid_stopwords(hist)
 
-#     words_without_stopwords=[]
+    print('The top 20 common words are:')
+    common=most_commonlist(top_20)
+    print(common)
 
-#     for word in movie_review_list:
-#         if word not in stop_words:
-#             words_without_stopwords.append(word)
-#     return words_without_stopwords
+    print('Based on a sentiment analysis, the score was:')
+    score=sentiment(reviews)
+    print(score)
 
-# print(filter_out_stopwords(movie_reviews))
+    print('Thus,most of the reviews were: ')
+    overall_thoughts=overall_sentiment(score)
+    # print(overall_thoughts)
+   
 
-
-# if __name__ == '__main__':
-# main()
+if __name__=='__main__':
+    main()
