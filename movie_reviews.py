@@ -31,11 +31,32 @@ def choose_movie(x):
     return (movie_reviews_content)
 
 
-movie_reviews_content=choose_movie('cats')
+movie_reviews_content=choose_movie('Scream 6')
+#print(movie_reviews_content)
 
 def number_score(movie_reviews_content):
-    """Returns the average rating from all the reviews"""
-    
+    """Returns a list of all the ratings from the reviews"""
+    ratings_list=[]
+    for reviews in movie_reviews_content:
+        ratings_list.append(reviews['rating'])
+
+    return ratings_list
+
+ratings_list=number_score(movie_reviews_content)
+# print(ratings_list)
+
+def calculate_average_rating(ratings_list):
+    """ Take the list of ratings and calculates the average rating."""
+    total_reviews=len(ratings_list)
+    sum=0
+    for i in ratings_list:
+        if(type(i) == int):
+            sum+=i
+    average=sum/total_reviews
+    return average
+
+average=calculate_average_rating(ratings_list)
+# print(average)
 
 
 
@@ -147,6 +168,11 @@ def main():
     print('The top 20 common words are:')
     common=most_commonlist(top_20)
     print(common)
+
+    print('On average, out of 10 stars, people rated it:')
+    ratings_list=number_score(movie_reviews_content)
+    average=calculate_average_rating(ratings_list)
+    print(average)
 
     print('Based on a sentiment analysis, the score was:')
     score=sentiment(reviews)
